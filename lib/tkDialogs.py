@@ -33,7 +33,7 @@
 # Date:	02-Aug-2006
 
 __author__ = "Vasilis Vlachoudis"
-__email__  = "Vasilis.Vlachoudis@cern.ch"
+__email__ = "Vasilis.Vlachoudis@cern.ch"
 
 import sys
 import time
@@ -49,7 +49,8 @@ except ImportError:
 import tkExtra
 import bFileDialog
 
-#===============================================================================
+
+# ===============================================================================
 # Similar to the Dialog.py from Tk but transient to master
 #
 # This class displays a dialog box, waits for a button in the dialog
@@ -65,7 +66,7 @@ import bFileDialog
 #		(-1 means none).
 # args -	One or more strings to display in buttons across the
 #		bottom of the dialog box.
-#===============================================================================
+# ===============================================================================
 class Dialog(Toplevel):
 	def __init__(self, master=None, cnf={}, **kw):
 		Toplevel.__init__(self, master, class_="Dialog", **kw)
@@ -80,15 +81,15 @@ class Dialog(Toplevel):
 		# Fill the top part with bitmap and message (use the option
 		# database for -wraplength and -font so that they can be
 		# overridden by the caller).
-		#self.option_add("*Dialog.msg.wrapLength","3i","widgetDefault")
-		#self.option_add("*Dialog.msg.font","TkCaptionFont","widgetDefault")
+		# self.option_add("*Dialog.msg.wrapLength","3i","widgetDefault")
+		# self.option_add("*Dialog.msg.font","TkCaptionFont","widgetDefault")
 
 		fbot = Frame(self, relief=RAISED, bd=1)
 		ftop = Frame(self, relief=RAISED, bd=1)
 		fbot.pack(side=BOTTOM, fill=BOTH)
 		ftop.pack(side=TOP, fill=BOTH, expand=YES)
 		self.tk.call("grid", "anchor", fbot._w, CENTER)
-		#self.grid_anchor(CENTER)
+		# self.grid_anchor(CENTER)
 
 		l = Label(ftop, text=cnf["text"], wraplength="3i", font="TkCaptionFont", justify=LEFT)
 		l.pack(side=RIGHT, fill=BOTH, expand=YES, padx="3m", pady="3m")
@@ -98,19 +99,19 @@ class Dialog(Toplevel):
 			l.pack(side=LEFT, padx="3m", pady="3m")
 
 		# Create a row of buttons at the bottom of the dialog
-		for i,s in enumerate(cnf["strings"]):
-			b = Button(fbot, text=s, command=lambda s=self,n=i:s.close(n))
-			b.bind("<Return>", lambda e : e.widget.invoke())
-			if i==cnf["default"]:
+		for i, s in enumerate(cnf["strings"]):
+			b = Button(fbot, text=s, command=lambda s=self, n=i: s.close(n))
+			b.bind("<Return>", lambda e: e.widget.invoke())
+			if i == cnf["default"]:
 				b.config(default="active")
 				b.focus_set()
 			else:
 				b.config(default="normal")
 			b.grid(column=i, row=0, sticky=EW, padx=10, pady=4)
 
-		self.bind("<Escape>", lambda e,s=self:s.close())
-		self.bind("<Right>", lambda e : e.widget.event_generate("<Tab>"))
-		self.bind("<Left>",  lambda e : e.widget.event_generate("<Shift-Tab>"))
+		self.bind("<Escape>", lambda e, s=self: s.close())
+		self.bind("<Right>", lambda e: e.widget.event_generate("<Tab>"))
+		self.bind("<Left>", lambda e: e.widget.event_generate("<Shift-Tab>"))
 
 		self.deiconify()
 		self.wait_visibility()
@@ -118,14 +119,15 @@ class Dialog(Toplevel):
 		self.focus_set()
 		self.wait_window()
 
-	#-----------------------------------------------------------------------
+	# -----------------------------------------------------------------------
 	def close(self, num=-1):
 		self.num = num
 		self.destroy()
 
-#=============================================================================
+
+# =============================================================================
 # Input dialog
-#=============================================================================
+# =============================================================================
 class InputDialog(Toplevel):
 	"""
 	Input dialog:
@@ -135,8 +137,9 @@ class InputDialog(Toplevel):
 		spin  = Spin box with limits from_, to_
 		float = any float
 	"""
+
 	def __init__(self, master, title, message, input="",
-			type_="str", from_=None, to_=None):
+	             type_="str", from_=None, to_=None):
 
 		Toplevel.__init__(self, master)
 		self.transient(master)
@@ -145,12 +148,12 @@ class InputDialog(Toplevel):
 
 		if type_ == "int":
 			self.entry = tkExtra.IntegerEntry(self)
-			self.entry.insert(0,input)
+			self.entry.insert(0, input)
 			w = self.entry
 
 		elif type_ == "float":
 			self.entry = tkExtra.FloatEntry(self)
-			self.entry.insert(0,input)
+			self.entry.insert(0, input)
 			w = self.entry
 
 		elif type_ == "spin":
@@ -158,7 +161,7 @@ class InputDialog(Toplevel):
 			self.entry.set(input)
 			w = Spinbox(self, text=self.entry, from_=from_, to_=to_)
 
-		else:	# default str
+		else:  # default str
 			self.entry = Entry(self)
 			self.entry.insert(0, input)
 			w = self.entry
@@ -200,14 +203,15 @@ class InputDialog(Toplevel):
 	def cancel(self, event=None):
 		self.destroy()
 
-#=============================================================================
+
+# =============================================================================
 # Find/Replace dialog
-#=============================================================================
+# =============================================================================
 class FindReplaceDialog(Toplevel):
 	def __init__(self, master, replace=True):
 		Toplevel.__init__(self, master)
 		self.transient(master)
-		self.replace  = replace
+		self.replace = replace
 		self.caseVar = IntVar()
 
 		main_frame = Frame(self)
@@ -217,43 +221,43 @@ class FindReplaceDialog(Toplevel):
 		bottom_frame.pack(side=BOTTOM, padx=10, pady=5)
 
 		btn = Button(bottom_frame, text="Find", underline=0,
-					width=8, command=self._find)
+		             width=8, command=self._find)
 		btn.pack(side=LEFT)
 
 		if self.replace:
 			self.title('Replace')
 
 			btn = Button(bottom_frame,
-					text="Replace", underline=0,
-					width=8, command=self._replace)
+			             text="Replace", underline=0,
+			             width=8, command=self._replace)
 			btn.pack(side=LEFT)
 
 			btn = Button(bottom_frame,
-					text="Replace All", underline=8,
-					width=8, command=self._replaceAll)
+			             text="Replace All", underline=8,
+			             width=8, command=self._replaceAll)
 			btn.pack(side=LEFT)
 
 		else:
 			self.title("Find")
 
 		btn = Button(bottom_frame,
-				text = "Close", underline=0,
-				width=8, command=self._close)
+		             text="Close", underline=0,
+		             width=8, command=self._close)
 		btn.pack(side=RIGHT)
 
 		top_frame = Frame(main_frame)
 		top_frame.pack(side=LEFT, fill=BOTH, expand=YES,
-					padx=10, pady=5)
+		               padx=10, pady=5)
 		findString_frame = Frame(top_frame)
 		findString_frame.pack(side=TOP, fill=X)
 
 		label = Label(findString_frame,
-				text='Find string: ',
-				width=12)
+		              text='Find string: ',
+		              width=12)
 		label.pack(side=LEFT)
 
 		self.findString_entry = Entry(findString_frame,
-			background="White")
+		                              background="White")
 		self.findString_entry.pack(side=RIGHT, fill=X, expand=YES)
 
 		if self.replace:
@@ -261,22 +265,22 @@ class FindReplaceDialog(Toplevel):
 			replaceString_frame.pack(side=TOP, fill=X)
 
 			label = Label(replaceString_frame,
-					text='Replace to: ',
-					width=12)
+			              text='Replace to: ',
+			              width=12)
 			label.pack(side=LEFT)
 
 			self.replaceString_entry = Entry(replaceString_frame,
-				background="White")
+			                                 background="White")
 			self.replaceString_entry.pack(side=RIGHT, fill=X, expand=YES)
 
 		options_frame = Frame(top_frame)
 		options_frame.pack(side=TOP, fill=X)
 		self.case_check = Checkbutton(options_frame,
-					text     = 'Match case? ',
-					onvalue  = 0,
-					offvalue = 1,
-					variable = self.caseVar)
-		self.case_check.pack(side = RIGHT)
+		                              text='Match case? ',
+		                              onvalue=0,
+		                              offvalue=1,
+		                              variable=self.caseVar)
+		self.case_check.pack(side=RIGHT)
 		self.case_check.deselect()
 
 		self.bind('<Escape>', self._close)
@@ -295,11 +299,11 @@ class FindReplaceDialog(Toplevel):
 	def show(self, find=None, replace=None, replaceAll=None, target=None):
 		if target:
 			self.findString_entry.insert('0', target)
-			self.findString_entry.select_range('0',END)
+			self.findString_entry.select_range('0', END)
 		else:
 			self.findString_entry.delete('0', END)
-		self.objFind       = find
-		self.objReplace    = replace
+		self.objFind = find
+		self.objReplace = replace
 		self.objReplaceAll = replaceAll
 		self.findString_entry.focus_set()
 		self.grab_set()
@@ -314,68 +318,69 @@ class FindReplaceDialog(Toplevel):
 
 	# --------------------------------------------------------------------
 	def _replace(self, event=None):
-		self.findString    = self.findString_entry.get()
+		self.findString = self.findString_entry.get()
 		self.replaceString = self.replaceString_entry.get()
 		if self.objReplace:
 			self.objReplace(self.findString,
-					self.replaceString,
-					self.caseVar.get())
+			                self.replaceString,
+			                self.caseVar.get())
 
 	# --------------------------------------------------------------------
 	def _replaceAll(self, event=None):
-		self.findString    = self.findString_entry.get()
+		self.findString = self.findString_entry.get()
 		self.replaceString = self.replaceString_entry.get()
 		if self.objReplaceAll:
 			self.objReplaceAll(self.findString,
-					self.replaceString,
-					self.caseVar.get())
+			                   self.replaceString,
+			                   self.caseVar.get())
 
 	# --------------------------------------------------------------------
 	def _close(self, event=None):
 		self.destroy()
 
-#=============================================================================
+
+# =============================================================================
 # Printer dialog
-#=============================================================================
+# =============================================================================
 class Printer(Toplevel):
-	PAPER_FORMAT = { "A3" : (29.7, 42.0),
-			 "B3" : (35.3, 50.0),
-			 "A4" :	(21.0, 29.7),
-			 "B4" :	(25.0, 35.3),
-			 "A5" : (14.8, 21.0),
-			 "B5" :	(17.6, 25.0),
-			 "Letter": (21.6, 27.9) }
-	printTo   = 1		# 1 = cmd, 0 = filename
-	cmd       = "lpr -P%p"
-	printer   = ""
-	filename  = "output.ps"
+	PAPER_FORMAT = {"A3": (29.7, 42.0),
+	                "B3": (35.3, 50.0),
+	                "A4": (21.0, 29.7),
+	                "B4": (25.0, 35.3),
+	                "A5": (14.8, 21.0),
+	                "B5": (17.6, 25.0),
+	                "Letter": (21.6, 27.9)}
+	printTo = 1  # 1 = cmd, 0 = filename
+	cmd = "lpr -P%p"
+	printer = ""
+	filename = "output.ps"
 	landscape = False
-	paper     = "A4"
-	copies    = 1
+	paper = "A4"
+	copies = 1
 
 	def __init__(self, master):
 		Toplevel.__init__(self, master)
 		self.transient(master)
 		self.title('Print')
 
-		self.printCmd  = IntVar()
+		self.printCmd = IntVar()
 		self.printCmd.set(Printer.printTo)
 		self.landscapeVar = IntVar()
 		self.landscapeVar.set(Printer.landscape)
-		self.paperVar     = StringVar()
+		self.paperVar = StringVar()
 		self.paperVar.set(Printer.paper)
-		self.copiesVar    = IntVar()
+		self.copiesVar = IntVar()
 		self.copiesVar.set(Printer.copies)
 
-		#self.geometry('+265+230')
+		# self.geometry('+265+230')
 
 		# -----
 		frame = LabelFrame(self, text="Print To")
 		frame.pack(side=TOP, fill=BOTH, expand=YES)
 
 		b = Radiobutton(frame, text="Printer:",
-			variable=self.printCmd, value=1,
-			command=self.printToChange)
+		                variable=self.printCmd, value=1,
+		                command=self.printToChange)
 		b.grid(row=0, column=0, sticky=W)
 
 		self.printer_combo = tkExtra.Combobox(frame, width=30)
@@ -390,15 +395,15 @@ class Printer(Toplevel):
 		self.cmd_entry.insert(0, Printer.cmd)
 
 		b = Radiobutton(frame, text="File Name:",
-			variable=self.printCmd, value=0,
-			command=self.printToChange)
+		                variable=self.printCmd, value=0,
+		                command=self.printToChange)
 		b.grid(row=2, column=0, sticky=W)
 
 		self.file_entry = Entry(frame, background="White", width=25)
 		self.file_entry.grid(row=2, column=1, sticky=EW)
 
 		self.browse_btn = Button(frame, text="Browse",
-				command=self.browse)
+		                         command=self.browse)
 		self.browse_btn.grid(row=2, column=2, sticky=EW)
 		frame.grid_columnconfigure(1, weight=1)
 
@@ -411,11 +416,11 @@ class Printer(Toplevel):
 		l.grid(row=row, column=0, sticky=E)
 
 		b = Radiobutton(frame, text="Portrait",
-			variable=self.landscapeVar, value=0)
+		                variable=self.landscapeVar, value=0)
 		b.grid(row=row, column=1, sticky=W)
 
 		b = Radiobutton(frame, text="Landscape",
-			variable=self.landscapeVar, value=1)
+		                variable=self.landscapeVar, value=1)
 		b.grid(row=row, column=2, columnspan=2, sticky=W)
 
 		row += 1
@@ -430,7 +435,7 @@ class Printer(Toplevel):
 		l.grid(row=row, column=2, sticky=E)
 
 		s = Spinbox(frame, text=self.copiesVar, from_=1, to=100,
-				background="White", width=3)
+		            background="White", width=3)
 		s.grid(row=row, column=3, sticky=W)
 
 		frame.grid_columnconfigure(1, weight=1)
@@ -457,11 +462,11 @@ class Printer(Toplevel):
 	# --------------------------------------------------------------------
 	def fillPrinters(self):
 		# On unix
-		if sys.platform in ("linux","linux2"):
+		if sys.platform in ("linux", "linux2"):
 			try:
-				f = open("/etc/printcap","r")
+				f = open("/etc/printcap", "r")
 				for line in f:
-					if len(line)==0: continue
+					if len(line) == 0: continue
 					if line[0] == '#': continue
 					field = line.split(":")
 					self.printer_combo.insert(END, field[0])
@@ -500,13 +505,13 @@ class Printer(Toplevel):
 	# --------------------------------------------------------------------
 	def ok(self, event=None):
 		self.rc = True
-		Printer.printTo   = self.printCmd.get()
-		Printer.cmd       = self.cmd_entry.get()
-		Printer.printer   = self.printer_combo.get()
-		Printer.filename  = self.file_entry.get()
+		Printer.printTo = self.printCmd.get()
+		Printer.cmd = self.cmd_entry.get()
+		Printer.printer = self.printer_combo.get()
+		Printer.filename = self.file_entry.get()
 		Printer.landscape = self.landscapeVar.get()
-		Printer.paper     = self.paperVar.get()
-		Printer.copies    = self.copiesVar.get()
+		Printer.paper = self.paperVar.get()
+		Printer.copies = self.copiesVar.get()
 		self.destroy()
 
 	# --------------------------------------------------------------------
@@ -532,10 +537,10 @@ class Printer(Toplevel):
 	# --------------------------------------------------------------------
 	def browse(self):
 		fn = bFileDialog.asksaveasfilename(master=self,
-				initialfile=self.file_entry.get(),
-				filetypes=[("Postscript file","*.ps"),
-					("Encapsulated postscript file","*.eps"),
-					("All","*")])
+		                                   initialfile=self.file_entry.get(),
+		                                   filetypes=[("Postscript file", "*.ps"),
+		                                              ("Encapsulated postscript file", "*.eps"),
+		                                              ("All", "*")])
 		if len(fn) > 0:
 			self.file_entry.delete(0, END)
 			self.file_entry.insert(0, fn)
@@ -547,18 +552,18 @@ class Printer(Toplevel):
 	def command():
 		printer = Printer.printer
 		bar = printer.find("|")
-		if bar>0: printer = printer[:bar]
+		if bar > 0: printer = printer[:bar]
 
 		if Printer.cmd.find("%p") == -1:
-			cmd = Printer.cmd + " -P %s"%(printer)
+			cmd = Printer.cmd + " -P %s" % (printer)
 		else:
-			cmd = Printer.cmd.replace("%p","%s")%(printer)
+			cmd = Printer.cmd.replace("%p", "%s") % (printer)
 
 		if cmd.find("%#") == -1:
-			cmd += " -# %d"%(Printer.copies)
+			cmd += " -# %d" % (Printer.copies)
 		else:
-			cmd = cmd.replace("%#","%d") % (Printer.copies)
-		#print "Printing command=\"%s\""%(cmd)
+			cmd = cmd.replace("%#", "%d") % (Printer.copies)
+		# print "Printing command=\"%s\""%(cmd)
 		return cmd
 
 	# --------------------------------------------------------------------
@@ -570,8 +575,8 @@ class Printer(Toplevel):
 		if self.rc:
 			if Printer.printTo:
 				self.hnd = subprocess.Popen(Printer.command(),
-						shell=True,
-						stdout=subprocess.PIPE).stdout
+				                            shell=True,
+				                            stdout=subprocess.PIPE).stdout
 			else:
 				self.hnd = open(Printer.filename, "w")
 		return self.hnd
@@ -589,9 +594,10 @@ class Printer(Toplevel):
 		if self.hnd:
 			self.hnd.close()
 
-#=============================================================================
+
+# =============================================================================
 # Show progress information
-#=============================================================================
+# =============================================================================
 class ProgressDialog(Toplevel):
 	def __init__(self, master, title):
 		Toplevel.__init__(self, master)
@@ -612,15 +618,15 @@ class ProgressDialog(Toplevel):
 		self.update_idletasks()
 		self.grab_set()
 
-		x = master.winfo_rootx() + (master.winfo_width() - self.winfo_width())/2
-		y = master.winfo_rooty() + (master.winfo_height() - self.winfo_height())/2
-		self.geometry('+%d+%d' % (x,y))
-		self.lastTime  = time.time()
+		x = master.winfo_rootx() + (master.winfo_width() - self.winfo_width()) / 2
+		y = master.winfo_rooty() + (master.winfo_height() - self.winfo_height()) / 2
+		self.geometry('+%d+%d' % (x, y))
+		self.lastTime = time.time()
 		self.refreshInterval = 0.25
 
 	# --------------------------------------------------------------------
 	def setLimits(self, low=0.0, high=100.0, step=1.0):
-		self.bar.setLimits(low,high,step)
+		self.bar.setLimits(low, high, step)
 		self.startTime = time.time()
 
 	# --------------------------------------------------------------------
@@ -629,7 +635,7 @@ class ProgressDialog(Toplevel):
 		self.lastTime = time.time()
 		self.bar.setProgress(pos)
 		if text is not None: self.label["text"] = text
-		#self.update_idletasks()
+		# self.update_idletasks()
 		self.update()
 		return self.ended
 
@@ -643,12 +649,13 @@ class ProgressDialog(Toplevel):
 		self.ended = True
 		self.close()
 
-#=============================================================================
+
+# =============================================================================
 if __name__ == "__main__":
 	root = Tk()
 	sd = Printer(root)
 	sd = FindReplaceDialog(root)
-	#print("FindReplace=",sd.show(None,"Hello"))
-	d = InputDialog(root,"Title","Message Line1\nMessage Line2")
-	#print("Input=",d.show())
+	# print("FindReplace=",sd.show(None,"Hello"))
+	d = InputDialog(root, "Title", "Message Line1\nMessage Line2")
+	# print("Input=",d.show())
 	root.mainloop()

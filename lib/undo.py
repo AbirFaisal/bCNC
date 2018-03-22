@@ -29,61 +29,61 @@
 #
 # Author:	Vasilis.Vlachoudis@cern.ch
 
-#===============================================================================
+# ===============================================================================
 # Undo Redo Class
-#===============================================================================
+# ===============================================================================
 class UndoRedo:
-	#-----------------------------------------------------------------------
+	# -----------------------------------------------------------------------
 	def __init__(self):
 		self.undoList = []
 		self.redoList = []
 
-	#-----------------------------------------------------------------------
+	# -----------------------------------------------------------------------
 	def reset(self):
 		del self.undoList[:]
 		del self.redoList[:]
 
-	#-----------------------------------------------------------------------
+	# -----------------------------------------------------------------------
 	# Add undoinfo as (msg, func/list, args)
-	#-----------------------------------------------------------------------
+	# -----------------------------------------------------------------------
 	def add(self, undoinfo, msg=None):
 		if not undoinfo: return
 		if msg is not None:
 			if isinstance(undoinfo[0], (str, unicode)):
 				# replace message
 				undoinfo = (msg,) + undoinfo[1:]
-			elif isinstance(undoinfo,tuple):
+			elif isinstance(undoinfo, tuple):
 				undoinfo = (msg,) + undoinfo
 			else:
-				undoinfo = (msg,undoinfo)
+				undoinfo = (msg, undoinfo)
 			f = 1
 		else:
 			f = int(isinstance(undoinfo[0], (str, unicode)))
-		assert isinstance(undoinfo,list) or callable(undoinfo[f]) or isinstance(undoinfo[f],list)
+		assert isinstance(undoinfo, list) or callable(undoinfo[f]) or isinstance(undoinfo[f], list)
 		self.undoList.append(undoinfo)
 		del self.redoList[:]
 
-	#-----------------------------------------------------------------------
+	# -----------------------------------------------------------------------
 	# Split the undoinfo into [msg, ]func/list [, args]
 	# msg can exists or not check for str/unicode
 	# func can be a list or an executable
 	# if func is a list then there are no args
 	# @return always a tuple of 3 with msg, func, args
-	#-----------------------------------------------------------------------
+	# -----------------------------------------------------------------------
 	@staticmethod
 	def _split(undoinfo):
 		if isinstance(undoinfo, list):
 			return None, undoinfo, None
 		elif undoinfo[0] is None or isinstance(undoinfo[0], (str, unicode)):
-			assert callable(undoinfo[1]) or isinstance(undoinfo[1],list)
+			assert callable(undoinfo[1]) or isinstance(undoinfo[1], list)
 			return undoinfo[0], undoinfo[1], undoinfo[2:]
 		else:
-			assert callable(undoinfo[0]) or isinstance(undoinfo[0],list)
+			assert callable(undoinfo[0]) or isinstance(undoinfo[0], list)
 			return None, undoinfo[0], undoinfo[1:]
 
-	#-----------------------------------------------------------------------
+	# -----------------------------------------------------------------------
 	# Execute the undoinfo and return the redoinfo
-	#-----------------------------------------------------------------------
+	# -----------------------------------------------------------------------
 	def _execute(self, undoinfo):
 		if undoinfo is None: return None
 		msg, func, args = UndoRedo._split(undoinfo)
@@ -96,47 +96,47 @@ class UndoRedo:
 			else:
 				return redolist
 		else:
-#			print "<<< Undo:", undoinfo
+			#			print "<<< Undo:", undoinfo
 			redoinfo = func(*args)
-#			print ">>> Redo:", redoinfo
-			if isinstance(redoinfo[0],(str,unicode)):
+			#			print ">>> Redo:", redoinfo
+			if isinstance(redoinfo[0], (str, unicode)):
 				return redoinfo
 			elif msg:
 				return (msg,) + redoinfo
 			else:
 				return redoinfo
 
-	#-----------------------------------------------------------------------
+	# -----------------------------------------------------------------------
 	def undo(self):
 		if not self.undoList: return
 		self.redoList.append(self._execute(self.undoList.pop()))
 
-	#-----------------------------------------------------------------------
+	# -----------------------------------------------------------------------
 	def redo(self):
 		if not self.redoList: return
 		self.undoList.append(self._execute(self.redoList.pop()))
 
-	#-----------------------------------------------------------------------
+	# -----------------------------------------------------------------------
 	def canUndo(self):
 		return bool(self.undoList)
 
-	#-----------------------------------------------------------------------
+	# -----------------------------------------------------------------------
 	def canRedo(self):
 		return bool(self.redoList)
 
-	#-----------------------------------------------------------------------
+	# -----------------------------------------------------------------------
 	def undoText(self):
 		u = self.undoList[-1]
-		if isinstance(u[0], (str,unicode)):
+		if isinstance(u[0], (str, unicode)):
 			return u[0]
 		else:
 			return "undo"
 
-	#-----------------------------------------------------------------------
+	# -----------------------------------------------------------------------
 	def undoTextList(self):
 		lst = []
 		for u in self.undoList:
-			if isinstance(u[0], (str,unicode)):
+			if isinstance(u[0], (str, unicode)):
 				lst.append(u[0])
 			else:
 				lst.append("undo")

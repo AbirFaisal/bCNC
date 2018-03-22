@@ -5,12 +5,12 @@
 # Date: 24-Aug-2014
 
 __author__ = "Vasilis Vlachoudis"
-__email__  = "Vasilis.Vlachoudis@cern.ch"
+__email__ = "Vasilis.Vlachoudis@cern.ch"
 
 import os
 import re
 import sys
-#import cgi
+# import cgi
 import json
 import urllib
 import tempfile
@@ -36,54 +36,55 @@ except ImportError:
 import Camera
 
 HOSTNAME = "localhost"
-port     = 8080
+port = 8080
 
-httpd    = None
-prgpath  = os.path.abspath(os.path.dirname(sys.argv[0]))
-webpath  = "%s/pendant"%(prgpath)
-iconpath = "%s/icons/"%(prgpath)
+httpd = None
+prgpath = os.path.abspath(os.path.dirname(sys.argv[0]))
+webpath = "%s/pendant" % (prgpath)
+iconpath = "%s/icons/" % (prgpath)
 
-#==============================================================================
+
+# ==============================================================================
 # Simple Pendant controller for CNC
-#==============================================================================
+# ==============================================================================
 class Pendant(HTTPServer.BaseHTTPRequestHandler):
 	camera = None
 
-	#----------------------------------------------------------------------
+	# ----------------------------------------------------------------------
 	def log_message(self, fmt, *args):
 		# Only requests to the main page log them, all other ignore
 		if args[0].startswith("GET / "):
 			HTTPServer.BaseHTTPRequestHandler.log_message(self, fmt, *args)
 
-	#----------------------------------------------------------------------
+	# ----------------------------------------------------------------------
 	def do_HEAD(self, rc=200, content="text/html"):
 		self.send_response(rc)
 		self.send_header("Content-type", content)
 		self.end_headers()
 
-	#----------------------------------------------------------------------
+	# ----------------------------------------------------------------------
 	def do_GET(self):
 		"""Respond to a GET request."""
 		if "?" in self.path:
-			page,arg = self.path.split("?",1)
+			page, arg = self.path.split("?", 1)
 			arg = dict(urlparse.parse_qsl(arg))
 		else:
 			page = self.path
 			arg = None
 
-#		print self.path,type(self.path)
-#		print page
-#		print arg
+		#		print self.path,type(self.path)
+		#		print page
+		#		print arg
 
 		if page == "/send":
 			if arg is None: return
-			for key,value in arg.items():
-				if key=="gcode":
+			for key, value in arg.items():
+				if key == "gcode":
 					for line in value.split('\n'):
-						httpd.app.queue.put(line+"\n")
-				elif key=="cmd":
+						httpd.app.queue.put(line + "\n")
+				elif key == "cmd":
 					httpd.app.pendant.put(urllib.unquote(value))
-			#send empty response so browser does not generate errors
+			# send empty response so browser does not generate errors
 			self.do_HEAD(200, "text/text")
 			self.wfile.write("")
 
@@ -97,15 +98,15 @@ class Pendant(HTTPServer.BaseHTTPRequestHandler):
 		elif page == "/config":
 			self.do_HEAD(200, content="text/text")
 			snd = {}
-			snd["rpmmax"] = httpd.app.get("CNC","spindlemax")
+			snd["rpmmax"] = httpd.app.get("CNC", "spindlemax")
 			self.wfile.write(json.dumps(snd))
 
 		elif page == "/icon":
 			if arg is None: return
 			self.do_HEAD(200, content="image/gif")
-			filename = os.path.join(iconpath, arg["name"]+".gif")
+			filename = os.path.join(iconpath, arg["name"] + ".gif")
 			try:
-				f = open(filename,"rb")
+				f = open(filename, "rb")
 				self.wfile.write(f.read())
 				f.close()
 			except:
@@ -130,7 +131,7 @@ class Pendant(HTTPServer.BaseHTTPRequestHandler):
 					self.do_HEAD(200, content="image/gif")
 					filename = os.path.join(iconpath, "warn.gif")
 					try:
-						f = open(filename,"rb")
+						f = open(filename, "rb")
 						self.wfile.write(f.read())
 						f.close()
 					except:
@@ -144,10 +145,10 @@ class Pendant(HTTPServer.BaseHTTPRequestHandler):
 
 			if Pendant.camera.read():
 				Pendant.camera.save("camera.jpg")
-				#cv.imwrite("camera.jpg",img)
+				# cv.imwrite("camera.jpg",img)
 				self.do_HEAD(200, content="image/jpeg")
 				try:
-					f = open("camera.jpg","rb")
+					f = open("camera.jpg", "rb")
 					self.wfile.write(f.read())
 					f.close()
 				except:
@@ -155,7 +156,7 @@ class Pendant(HTTPServer.BaseHTTPRequestHandler):
 		else:
 			self.mainPage(page[1:])
 
-	#----------------------------------------------------------------------
+	# ----------------------------------------------------------------------
 	def deal_post_data(self):
 		boundary = self.headers.plisttext.split("=")[1]
 		remainbytes = int(self.headers['content-length'])
@@ -171,7 +172,7 @@ class Pendant(HTTPServer.BaseHTTPRequestHandler):
 		path = os.path.expanduser("~")
 		path = os.path.join(path, "bCNCUploads")
 		if not os.path.exists(path):
-		    os.makedirs(path)
+			os.makedirs(path)
 		fn = os.path.join(path, fn[0])
 		line = self.rfile.readline()
 		remainbytes -= len(line)
@@ -199,32 +200,40 @@ class Pendant(HTTPServer.BaseHTTPRequestHandler):
 				preline = line
 		return (False, "Unexpected Ends of data.")
 
-	#----------------------------------------------------------------------
+	# ----------------------------------------------------------------------
 	def do_POST(self):
-		result,fMsg=self.deal_post_data()
-		if(result):
-			httpd.app._pendantFileUploaded=fMsg
-		#send empty response so browser does not generate errors
+		result, fMsg = self.deal_post_data()
+		if (result):
+			httpd.app._pendantFileUploaded = fMsg
+		# send empty response so browser does not generate errors
 		self.do_HEAD(200, "text/text")
 
 	# ---------------------------------------------------------------------
 	def mainPage(self, page):
 		global webpath
 
-		#handle certain filetypes
+		# handle certain filetypes
 		filetype = page.rpartition('.')[2]
-		if   filetype == "css": self.do_HEAD(content="text/css")
-		elif filetype == "js":  self.do_HEAD(content="application/x-javascript")
-		elif filetype == "json": self.do_HEAD(content="application/json")
-		elif filetype == "jpg" or filetype == "jpeg" : self.do_HEAD(content="image/jpeg")
-		elif filetype == "gif": self.do_HEAD(content="image/gif")
-		elif filetype == "png": self.do_HEAD(content="image/png")
-		elif filetype == "ico": self.do_HEAD(content="image/x-icon")
-		else: self.do_HEAD()
+		if filetype == "css":
+			self.do_HEAD(content="text/css")
+		elif filetype == "js":
+			self.do_HEAD(content="application/x-javascript")
+		elif filetype == "json":
+			self.do_HEAD(content="application/json")
+		elif filetype == "jpg" or filetype == "jpeg":
+			self.do_HEAD(content="image/jpeg")
+		elif filetype == "gif":
+			self.do_HEAD(content="image/gif")
+		elif filetype == "png":
+			self.do_HEAD(content="image/png")
+		elif filetype == "ico":
+			self.do_HEAD(content="image/x-icon")
+		else:
+			self.do_HEAD()
 
 		if page == "": page = "index.html"
 		try:
-			f = open(os.path.join(webpath,page),"r")
+			f = open(os.path.join(webpath, page), "r")
 			self.wfile.write(f.read())
 			f.close()
 		except IOError:
@@ -240,6 +249,7 @@ Page not found.
 </html>
 """)
 
+
 # -----------------------------------------------------------------------------
 def _server(app):
 	global httpd
@@ -251,6 +261,7 @@ def _server(app):
 	except:
 		httpd = None
 
+
 # -----------------------------------------------------------------------------
 def start(app):
 	global httpd
@@ -260,6 +271,7 @@ def start(app):
 	thread.start()
 	return True
 
+
 # -----------------------------------------------------------------------------
 def stop():
 	global httpd
@@ -268,6 +280,7 @@ def stop():
 	httpd = None
 	if Pendant.camera: Pendant.camera.stop()
 	return True
+
 
 if __name__ == '__main__':
 	start()

@@ -8,49 +8,50 @@
 # see at http://www.dullbits.com/drawbot/drawbot
 
 __author__ = "Filippo Rivato"
-__email__  = "f.rivato@gmail.com"
+__email__ = "f.rivato@gmail.com"
 
 __name__ = _("Sketch")
-__version__= "0.0.1"
+__version__ = "0.0.1"
 
 import math
 # import time
 import random
 from array import *
 
-from CNC import CNC,Block
+from CNC import CNC, Block
 from ToolsPage import Plugin
 
 
-#==============================================================================
+# ==============================================================================
 # Create sketch
-#==============================================================================
+# ==============================================================================
 class Tool(Plugin):
 	__doc__ = _("Create sketch based on picture brightness")
+
 	def __init__(self, master):
 		Plugin.__init__(self, master, "Sketch")
-		self.icon  = "sketch"
+		self.icon = "sketch"
 		self.group = "Artistic"
 
 		self.variables = [
-			("name",              "db" ,        "", _("Name")),
-			("Grundgy","Low,Medium,High,Very High", "Medium",  _("Grundgy, search radius")),
-			("Depth"  ,           "mm" ,       0.0, _("Working Depth")),
-			("MaxSize"  ,         "mm" ,     250.0, _("Maximum size")),
-			("SquiggleTotal" ,   "int" ,       300, _("Squiggle total count")),
-			("SquiggleLength",    "mm" ,     400.0, _("Squiggle Length")),
-			("DrawBorder",      "bool",      False, _("Draw border")),
-			("File"  ,          "file" ,        "", _("Image to process")),
-			("Channel","Luminance,Red,Green,Blue" ,"Luminance", _("Channel to analyze")),
+			("name", "db", "", _("Name")),
+			("Grundgy", "Low,Medium,High,Very High", "Medium", _("Grundgy, search radius")),
+			("Depth", "mm", 0.0, _("Working Depth")),
+			("MaxSize", "mm", 250.0, _("Maximum size")),
+			("SquiggleTotal", "int", 300, _("Squiggle total count")),
+			("SquiggleLength", "mm", 400.0, _("Squiggle Length")),
+			("DrawBorder", "bool", False, _("Draw border")),
+			("File", "file", "", _("Image to process")),
+			("Channel", "Luminance,Red,Green,Blue", "Luminance", _("Channel to analyze")),
 		]
 		self.buttons.append("exe")
 
 	# ----------------------------------------------------------------------
 	def findFirst(self, pix, scanAll):
 		most = 256
-		for x in xrange(2,self.imgWidth - 2):
-			for y in xrange(2,self.imgHeight - 2):
-				val = pix[x,y]
+		for x in xrange(2, self.imgWidth - 2):
+			for y in xrange(2, self.imgHeight - 2):
+				val = pix[x, y]
 
 				if val < most:
 					most = val
@@ -58,10 +59,10 @@ class Tool(Plugin):
 					bestY = y
 				if (val <= self.mostest) and not scanAll:
 					self.mostest = most
-					return bestX,bestY
+					return bestX, bestY
 
 		self.mostest = most
-		return bestX,bestY
+		return bestX, bestY
 
 	# ----------------------------------------------------------------------
 	def findInRange(self, startX, startY, pix, maxRange):
@@ -72,16 +73,16 @@ class Tool(Plugin):
 
 		bestX = startX
 		bestY = startY
-		distance=1
+		distance = 1
 
 		most = 256
-		for x in xrange(xmin,xmax):
-			for y in xrange(ymin,ymax):
-				distance = math.sqrt((startX - x)**2 + (startY -y)**2)
-				if(distance > maxRange):
+		for x in xrange(xmin, xmax):
+			for y in xrange(ymin, ymax):
+				distance = math.sqrt((startX - x) ** 2 + (startY - y) ** 2)
+				if (distance > maxRange):
 					continue
-				val = pix[x,y]
-				val += (random.random()*2.)  #avoid ugly straight lines, steal time
+				val = pix[x, y]
+				val += (random.random() * 2.)  # avoid ugly straight lines, steal time
 				if val < most:
 					most = val
 					bestX = x
@@ -92,41 +93,40 @@ class Tool(Plugin):
 		return bestX, bestY, distance
 
 	def fadePixel(self, x, y, pix):
-		pix[x,y] +=40
-		pix[x+1,y] +=16
-		pix[x-1,y] +=16
-		pix[x,y+1] +=16
-		pix[x,y-1] +=16
-		pix[x+1,y+1] +=8
-		pix[x-1,y-1] +=8
-		pix[x-1,y+1] +=8
-		pix[x+1,y-1] +=8
+		pix[x, y] += 40
+		pix[x + 1, y] += 16
+		pix[x - 1, y] += 16
+		pix[x, y + 1] += 16
+		pix[x, y - 1] += 16
+		pix[x + 1, y + 1] += 8
+		pix[x - 1, y - 1] += 8
+		pix[x - 1, y + 1] += 8
+		pix[x + 1, y - 1] += 8
 
-		#pix[x-2,y-2] +=4
-		pix[x-2,y-1] +=4
-		pix[x-2,y-0] +=4
-		pix[x-2,y+1] +=4
-		#pix[x-2,y+2] +=4
+		# pix[x-2,y-2] +=4
+		pix[x - 2, y - 1] += 4
+		pix[x - 2, y - 0] += 4
+		pix[x - 2, y + 1] += 4
+		# pix[x-2,y+2] +=4
 
-		#pix[x+2,y-2] +=4
-		pix[x+2,y-1] +=4
-		pix[x+2,y-0] +=4
-		pix[x+2,y+1] +=4
-		#pix[x+2,y+2] +=4
+		# pix[x+2,y-2] +=4
+		pix[x + 2, y - 1] += 4
+		pix[x + 2, y - 0] += 4
+		pix[x + 2, y + 1] += 4
+		# pix[x+2,y+2] +=4
 
-		#pix[x-2,y-2] +=4
-		pix[x-1,y-2] +=4
-		pix[x-0,y-2] +=4
-		pix[x+1,y+2] +=4
-		#pix[x+2,y+2] +=4
+		# pix[x-2,y-2] +=4
+		pix[x - 1, y - 2] += 4
+		pix[x - 0, y - 2] += 4
+		pix[x + 1, y + 2] += 4
+		# pix[x+2,y+2] +=4
 
-		#pix[x-2,y+2] +=4
-		pix[x-1,y+2] +=4
-		pix[x-0,y+2] +=4
-		pix[x+1,y+2] +=4
-		#pix[x+2,y+2] +=4
+		# pix[x-2,y+2] +=4
+		pix[x - 1, y + 2] += 4
+		pix[x - 0, y + 2] += 4
+		pix[x + 1, y + 2] += 4
 
-
+	# pix[x+2,y+2] +=4
 
 	# ----------------------------------------------------------------------
 	def execute(self, app):
@@ -137,12 +137,12 @@ class Tool(Plugin):
 			return
 
 		n = self["name"]
-		if not n or n=="default": n="Sketch"
+		if not n or n == "default": n = "Sketch"
 
-		#Calc desired size
-		grundgy =self["Grundgy"]
+		# Calc desired size
+		grundgy = self["Grundgy"]
 		maxSize = self["MaxSize"]
-		squiggleTotal  = self["SquiggleTotal"]
+		squiggleTotal = self["SquiggleTotal"]
 		squiggleLength = self["SquiggleLength"]
 		depth = self["Depth"]
 		drawBorder = self["DrawBorder"]
@@ -158,7 +158,7 @@ class Tool(Plugin):
 		elif grundgy == "Very High":
 			radius = 9
 
-		#Check parameters
+		# Check parameters
 		if maxSize < 1:
 			app.setStatus(_("Sketch abort: Too small to draw anything!"))
 			return
@@ -166,7 +166,7 @@ class Tool(Plugin):
 		if squiggleTotal < 1:
 			app.setStatus(_("Sketch abort: Please let me draw at least 1 squiggle"))
 			return
-			
+
 		if squiggleLength <= 0:
 			app.setStatus(_("Sketch abort: Squiggle Length must be > 0"))
 			return
@@ -178,10 +178,10 @@ class Tool(Plugin):
 			app.setStatus(_("Sketch abort: Can't read image file"))
 			return
 
-		#Create a scaled image to work faster with big image and better with small ones
-		iWidth,iHeight = img.size
+		# Create a scaled image to work faster with big image and better with small ones
+		iWidth, iHeight = img.size
 		resampleRatio = 800.0 / iHeight
-		img = img.resize((int(iWidth *resampleRatio) ,int(iHeight * resampleRatio)), Image.ANTIALIAS)
+		img = img.resize((int(iWidth * resampleRatio), int(iHeight * resampleRatio)), Image.ANTIALIAS)
 		if channel == 'Blue':
 			img = img.convert('RGB')
 			img = img.split()[0]
@@ -192,81 +192,81 @@ class Tool(Plugin):
 			img = img.convert('RGB')
 			img = img.split()[2]
 		else:
-			img = img.convert ('L') #to calculate luminance
+			img = img.convert('L')  # to calculate luminance
 
-		img = img.transpose(Image.FLIP_TOP_BOTTOM) #ouput correct image
+		img = img.transpose(Image.FLIP_TOP_BOTTOM)  # ouput correct image
 		pix = img.load()
 
-		#Get image size
-		self.imgWidth, self.imgHeight =  img.size
+		# Get image size
+		self.imgWidth, self.imgHeight = img.size
 		self.ratio = 1
 		if (iWidth > iHeight):
 			self.ratio = maxSize / float(self.imgWidth)
 		else:
 			self.ratio = maxSize / float(self.imgHeight)
 
-		#Init blocks
+		# Init blocks
 		blocks = []
 
-		#Border block
-		block = Block("%s-border"%(self.name))
+		# Border block
+		block = Block("%s-border" % (self.name))
 		block.enable = drawBorder
 		block.append(CNC.zsafe())
-		block.append(CNC.grapid(0,0))
+		block.append(CNC.grapid(0, 0))
 		block.append(CNC.zenter(depth))
-		block.append(CNC.gcode(1, [("f",CNC.vars["cutfeed"])]))
+		block.append(CNC.gcode(1, [("f", CNC.vars["cutfeed"])]))
 		block.append(CNC.gline(self.imgWidth * self.ratio, 0))
-		block.append(CNC.gline(self.imgWidth * self.ratio, self.imgHeight*self.ratio))
-		block.append(CNC.gline(0, self.imgHeight*self.ratio))
-		block.append(CNC.gline(0,0))
+		block.append(CNC.gline(self.imgWidth * self.ratio, self.imgHeight * self.ratio))
+		block.append(CNC.gline(0, self.imgHeight * self.ratio))
+		block.append(CNC.gline(0, 0))
 		blocks.append(block)
 
-		#Draw block
+		# Draw block
 		block = Block(self.name)
 		block.append("(Sketch size W=%d x H=%d x distance=%d)" %
-			 (self.imgWidth * self.ratio  , self.imgHeight * self.ratio  , depth))
-		block.append("(Channel = %s)" %(channel))
-		#choose a nice starting point
+		             (self.imgWidth * self.ratio, self.imgHeight * self.ratio, depth))
+		block.append("(Channel = %s)" % (channel))
+		# choose a nice starting point
 		x = self.imgWidth / 4.
 		y = self.imgHeight / 4.
 
-		#First round search in all image
+		# First round search in all image
 		self.mostest = 256
-		x,y = self.findFirst(pix, True)
+		x, y = self.findFirst(pix, True)
 
-		#startAll = time.time()
+		# startAll = time.time()
 		for c in range(squiggleTotal):
-			#print c,x,y
-			#start = time.time()
-			x,y = self.findFirst(pix, False)
-			#print 'Find mostest: %f' % (time.time() - start)
-			#move there
+			# print c,x,y
+			# start = time.time()
+			x, y = self.findFirst(pix, False)
+			# print 'Find mostest: %f' % (time.time() - start)
+			# move there
 			block.append(CNC.zsafe())
-			block.append(CNC.grapid(x*self.ratio, y*self.ratio))
-			#tool down
+			block.append(CNC.grapid(x * self.ratio, y * self.ratio))
+			# tool down
 			block.append(CNC.zenter(depth))
-			#restore cut/draw feed
-			block.append(CNC.gcode(1, [("f",CNC.vars["cutfeed"])]))
+			# restore cut/draw feed
+			block.append(CNC.gcode(1, [("f", CNC.vars["cutfeed"])]))
 
-			#start = time.time()
+			# start = time.time()
 			s = 0
 			while (s < squiggleLength):
-				x,y,distance = self.findInRange(x, y, pix, radius)
-				s+= max(1,distance*self.ratio)  #add traveled distance
-				#move there
-				block.append(CNC.gline(x*self.ratio,y*self.ratio))
-				self.fadePixel(x, y, pix) #adjustbrightness int the bright map
-			#tool up
+				x, y, distance = self.findInRange(x, y, pix, radius)
+				s += max(1, distance * self.ratio)  # add traveled distance
+				# move there
+				block.append(CNC.gline(x * self.ratio, y * self.ratio))
+				self.fadePixel(x, y, pix)  # adjustbrightness int the bright map
+			# tool up
 			block.append(CNC.zsafe())
-			#print 'Squiggle: %f' % (time.time() - start)
+		# print 'Squiggle: %f' % (time.time() - start)
 
-		#Gcode Zsafe
+		# Gcode Zsafe
 		block.append(CNC.zsafe())
 		blocks.append(block)
 		active = app.activeBlock()
 		app.gcode.insBlocks(active, blocks, "Sketch")
 		app.refresh()
 		app.setStatus(_("Generated Sketch size W=%d x H=%d x distance=%d, Total length:%d") %
-			(self.imgWidth*self.ratio  , self.imgHeight*self.ratio , depth, squiggleTotal*squiggleLength))
-		#img.save('test.png')
-		#print 'Time: %f' % (time.time() - startAll)
+		              (self.imgWidth * self.ratio, self.imgHeight * self.ratio, depth, squiggleTotal * squiggleLength))
+# img.save('test.png')
+# print 'Time: %f' % (time.time() - startAll)

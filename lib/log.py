@@ -34,23 +34,27 @@
 # Date:	10-Oct-2014
 
 __author__ = "Vasilis Vlachoudis"
-__email__  = "Vasilis.Vlachoudis@cern.ch"
+__email__ = "Vasilis.Vlachoudis@cern.ch"
 
 import sys
 
-#-------------------------------------------------------------------------------
+# -------------------------------------------------------------------------------
 _log = None
+
+
 def set(l):
 	global _log
 	_log = l
 
+
 def say(*kw):
 	global _log
-	txt = " ".join(map(str,kw))
+	txt = " ".join(map(str, kw))
 	if _log:
 		_log(txt)
 	else:
-		sys.stdout.write("%s\n"%(txt))
+		sys.stdout.write("%s\n" % (txt))
+
 
 def null(*kw):
 	pass

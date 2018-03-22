@@ -1,12 +1,12 @@
 <html>
 <head>
-<title>bCNC Pendant</title>
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<link rel="stylesheet" type="text/css" href="pure-min.css" />
-<script type="text/javascript" src="jquery-2.1.4.min.js" ></script>
-<script type="text/javascript" src="fastclick.js"></script>
+    <title>bCNC Pendant</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <link rel="stylesheet" type="text/css" href="pure-min.css"/>
+    <script type="text/javascript" src="jquery-2.1.4.min.js"></script>
+    <script type="text/javascript" src="fastclick.js"></script>
 
-<script type="text/javascript">
+    <script type="text/javascript">
 	/* set up all functions */
 	var rpmmax = 12000;
 	var xmlhttp = false;
@@ -221,9 +221,10 @@
 		setInterval(getState, 1000);
 		/* ASSIGN FUNCTIONS TO UI ELEMENTS */
 	});
-</script>
 
-<style type="text/css">
+    </script>
+
+    <style type="text/css">
 	.command {
 		width:100%;
 		height:32px;
@@ -265,43 +266,58 @@
 		-webkit-box-sizing:border-box;
 		-moz-box-sizing: border-box;
 	}
-</style>
+
+    </style>
 </head>
 
 <body>
-	<h1><center>bCNC Pendant</center></h1>
+<h1>
+    <center>bCNC Pendant</center>
+</h1>
 
-	<!-- CONTROL BUTTONS & STATUS INFO -->
-	<div class="pure-g">
-		<div class="pure-u-1-3"><button id="btn-home" onclick="sendCmd('HOME');" class="button command" disabled>Home</button></div>
-		<div class="pure-u-1-3"><button id="btn-unlock" onclick="sendCmd('UNLOCK');" class="button command" disabled>Unlock</button></div>
-		<div class="pure-u-1-3"><button id="btn-reset" onclick="sendCmd('RESET');" class="button command" disabled>Reset</button></div>
-	</div>
-	<br />
-	<div class="pure-g border">
-		<div class="pure-u-1 large border" id="state" style="border-bottom:0px;"><span>Status</span>&nbsp;</div>
-	</div>
-	<div class="pure-g border">
-		<div class="pure-u-1 medium border" id="msg" style="border-bottom:0px;"><span>Message</span>&nbsp;</div>
-	</div>
+<!-- CONTROL BUTTONS & STATUS INFO -->
+<div class="pure-g">
+    <div class="pure-u-1-3">
+        <button id="btn-home" onclick="sendCmd('HOME');" class="button command" disabled>Home</button>
+    </div>
+    <div class="pure-u-1-3">
+        <button id="btn-unlock" onclick="sendCmd('UNLOCK');" class="button command" disabled>Unlock</button>
+    </div>
+    <div class="pure-u-1-3">
+        <button id="btn-reset" onclick="sendCmd('RESET');" class="button command" disabled>Reset</button>
+    </div>
+</div>
+<br/>
+<div class="pure-g border">
+    <div class="pure-u-1 large border" id="state" style="border-bottom:0px;"><span>Status</span>&nbsp;</div>
+</div>
+<div class="pure-g border">
+    <div class="pure-u-1 medium border" id="msg" style="border-bottom:0px;"><span>Message</span>&nbsp;</div>
+</div>
 
-	<div class="pure-g border">
-		<div class="pure-u-1-3 large">X: <span id='x'>&nbsp;</span></div>
-		<div class="pure-u-1-3 large">Y: <span id='y'>&nbsp;</span></div>
-		<div class="pure-u-1-3 large">Z: <span id='z'>&nbsp;</span></div>
-	</div>
-	<br />
-	<div class="pure-g">
-		<div class="pure-u-1-3"><button id="btn-run" onclick="sendCmd('RUN');" class="button command">Run</button></div>
-		<div class="pure-u-1-3"><button id="btn-pause" onclick="sendCmd('PAUSE');" class="button command">Pause</button></div>
-		<div class="pure-u-1-3"><button id="btn-stop" onclick="sendCmd('STOP');" class="button command">Stop</button></div>
-	</div>
+<div class="pure-g border">
+    <div class="pure-u-1-3 large">X: <span id='x'>&nbsp;</span></div>
+    <div class="pure-u-1-3 large">Y: <span id='y'>&nbsp;</span></div>
+    <div class="pure-u-1-3 large">Z: <span id='z'>&nbsp;</span></div>
+</div>
+<br/>
+<div class="pure-g">
+    <div class="pure-u-1-3">
+        <button id="btn-run" onclick="sendCmd('RUN');" class="button command">Run</button>
+    </div>
+    <div class="pure-u-1-3">
+        <button id="btn-pause" onclick="sendCmd('PAUSE');" class="button command">Pause</button>
+    </div>
+    <div class="pure-u-1-3">
+        <button id="btn-stop" onclick="sendCmd('STOP');" class="button command">Stop</button>
+    </div>
+</div>
 
-	<br />
-	<div class="pure-g">
-		<center>
-			<img id="camera" src="/camera"/>
-		</center>
-	</div>
+<br/>
+<div class="pure-g">
+    <center>
+        <img id="camera" src="/camera"/>
+    </center>
+</div>
 </body>
 </html>

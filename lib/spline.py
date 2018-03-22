@@ -7,9 +7,10 @@
 import sys
 import bmath
 
-#===============================================================================
+
+# ===============================================================================
 # Cardinal cubic spline class
-#===============================================================================
+# ===============================================================================
 class CardinalSpline:
 	def __init__(self, A=0.5):
 		# The default matrix is the Catmull-Rom splin
@@ -21,61 +22,62 @@ class CardinalSpline:
 		#	the second derivative is zero
 		self.setMatrix(A)
 
-	#-----------------------------------------------------------------------
+	# -----------------------------------------------------------------------
 	# Set the matrix according to Cardinal
-	#-----------------------------------------------------------------------
+	# -----------------------------------------------------------------------
 	def setMatrix(self, A=0.5):
 		self.M = []
-		self.M.append([  -A,  2.-A,    A-2.,   A ])
-		self.M.append([2.*A,  A-3., 3.-2.*A,  -A ])
-		self.M.append([  -A,    0.,       A,   0.])
-		self.M.append([  0.,    1.,       0,   0.])
+		self.M.append([-A, 2. - A, A - 2., A])
+		self.M.append([2. * A, A - 3., 3. - 2. * A, -A])
+		self.M.append([-A, 0., A, 0.])
+		self.M.append([0., 1., 0, 0.])
 
-	#-----------------------------------------------------------------------
+	# -----------------------------------------------------------------------
 	# Evaluate Cardinal spline at position t
 	# @param P	  list or tuple with 4 points y positions
 	# @param t [0..1] fraction of interval from points 1..2
 	# @param k	  index of starting 4 elements in P
 	# @return spline evaluation
-	#-----------------------------------------------------------------------
+	# -----------------------------------------------------------------------
 	def __call__(self, P, t, k=1):
-		T = [t*t*t, t*t, t, 1.0]
-		R = [0.0]*4
+		T = [t * t * t, t * t, t, 1.0]
+		R = [0.0] * 4
 		for i in range(4):
 			for j in range(4):
 				R[i] += T[j] * self.M[j][i]
 		y = 0.0
 		for i in range(4):
-			y += R[i]*P[k+i-1]
+			y += R[i] * P[k + i - 1]
 
 		return y
 
-	#-----------------------------------------------------------------------
+	# -----------------------------------------------------------------------
 	# Return the coefficients of a 3rd degree polynomial
 	#     f(x) = a t^3 + b t^2 + c t + d
 	# @return [a, b, c, d]
-	#-----------------------------------------------------------------------
+	# -----------------------------------------------------------------------
 	def coefficients(self, P, k=1):
-		C = [0.0]*4
+		C = [0.0] * 4
 		for i in range(4):
 			for j in range(4):
-				C[i] += self.M[i][j] * P[k+j-1]
+				C[i] += self.M[i][j] * P[k + j - 1]
 		return C
 
-	#-----------------------------------------------------------------------
+	# -----------------------------------------------------------------------
 	# Evaluate the value of the spline using the coefficients
-	#-----------------------------------------------------------------------
+	# -----------------------------------------------------------------------
 	def evaluate(self, C, t):
-		return ((C[0]*t + C[1])*t + C[2])*t + C[3]
+		return ((C[0] * t + C[1]) * t + C[2]) * t + C[3]
 
-#===============================================================================
+
+# ===============================================================================
 # Cubic spline ensuring that the first and second derivative are continuous
 # adapted from Penelope Manual Appending B.1
 # It requires all the points (xi,yi) and the assumption on how to deal
 # with the second derviative on the extremeties
 # Option 1: assume zero as second derivative on both ends
 # Option 2: assume the same as the next or previous one
-#===============================================================================
+# ===============================================================================
 class CubicSpline:
 	def __init__(self, X, Y):
 		self.X = X
@@ -83,97 +85,100 @@ class CubicSpline:
 		self.n = len(X)
 
 		# Option #1
-		s1 = 0.0	# zero based = s0
-		sN = 0.0	# zero based = sN-1
+		s1 = 0.0  # zero based = s0
+		sN = 0.0  # zero based = sN-1
 
 		# Construct the tri-diagonal matrix
 		A = []
-		B = [0.0] * (self.n-2)
-		for i in range(self.n-2):
-			A.append([0.0] * (self.n-2))
+		B = [0.0] * (self.n - 2)
+		for i in range(self.n - 2):
+			A.append([0.0] * (self.n - 2))
 
-		for i in range(1,self.n-1):
+		for i in range(1, self.n - 1):
 			hi = self.h(i)
-			Hi = 2.0*(self.h(i-1) + hi)
-			j = i-1
+			Hi = 2.0 * (self.h(i - 1) + hi)
+			j = i - 1
 			A[j][j] = Hi
-			if i+1<self.n-1:
-				A[j][j+1] = A[j+1][j] = hi
+			if i + 1 < self.n - 1:
+				A[j][j + 1] = A[j + 1][j] = hi
 
-			if i==1:
-				B[j] = 6.*(self.d(i) - self.d(j)) - hi*s1
-			elif i<self.n-2:
-				B[j] = 6.*(self.d(i) - self.d(j))
+			if i == 1:
+				B[j] = 6. * (self.d(i) - self.d(j)) - hi * s1
+			elif i < self.n - 2:
+				B[j] = 6. * (self.d(i) - self.d(j))
 			else:
-				B[j] = 6.*(self.d(i) - self.d(j)) - hi*sN
+				B[j] = 6. * (self.d(i) - self.d(j)) - hi * sN
 
-#		from pprint import pprint
-#		print "=========== A ============="
-#		pprint(A)
-#		print "=========== B ============="
-#		pprint(B)
+		#		from pprint import pprint
+		#		print "=========== A ============="
+		#		pprint(A)
+		#		print "=========== B ============="
+		#		pprint(B)
 
 		# Solve by gauss elimination
-#		AA = bmath.Matrix(A)
-#		BB = []
-#		for b in B: BB.append([b])
-#		BB = bmath.Matrix(BB)
-#		print AA
-#		print BB
-#		AA.inv()
-#		print AA*BB
-		self.s = bmath.gauss(A,B)
-		self.s.insert(0,s1)
+		#		AA = bmath.Matrix(A)
+		#		BB = []
+		#		for b in B: BB.append([b])
+		#		BB = bmath.Matrix(BB)
+		#		print AA
+		#		print BB
+		#		AA.inv()
+		#		print AA*BB
+		self.s = bmath.gauss(A, B)
+		self.s.insert(0, s1)
 		self.s.append(sN)
-#		print ">> s <<"
-#		pprint(self.s)
 
-	#-----------------------------------------------------------------------
+	#		print ">> s <<"
+	#		pprint(self.s)
+
+	# -----------------------------------------------------------------------
 	def h(self, i):
-		return self.X[i+1] - self.X[i]
+		return self.X[i + 1] - self.X[i]
 
-	#-----------------------------------------------------------------------
+	# -----------------------------------------------------------------------
 	def d(self, i):
-		return (self.Y[i+1] - self.Y[i]) / (self.X[i+1] - self.X[i])
+		return (self.Y[i + 1] - self.Y[i]) / (self.X[i + 1] - self.X[i])
 
-	#-----------------------------------------------------------------------
+	# -----------------------------------------------------------------------
 	def coefficients(self, i):
 		"""return coefficients of cubic spline for interval i a*x**3+b*x**2+c*x+d"""
-		hi  = self.h(i)
-		si  = self.s[i]
-		si1 = self.s[i+1]
-		xi  = self.X[i]
-		xi1 = self.X[i+1]
-		fi  = self.Y[i]
-		fi1 = self.Y[i+1]
+		hi = self.h(i)
+		si = self.s[i]
+		si1 = self.s[i + 1]
+		xi = self.X[i]
+		xi1 = self.X[i + 1]
+		fi = self.Y[i]
+		fi1 = self.Y[i + 1]
 
-		a = 1./(6.*hi)*(si*xi1**3 - si1*xi**3 + 6.*(fi*xi1 - fi1*xi)) + hi/6.*(si1*xi - si*xi1)
-		b = 1./(2.*hi)*(si1*xi**2 - si*xi1**2 + 2*(fi1 - fi)) + hi/6.*(si - si1)
-		c = 1./(2.*hi)*(si*xi1 - si1*xi)
-		d = 1./(6.*hi)*(si1-si)
+		a = 1. / (6. * hi) * (si * xi1 ** 3 - si1 * xi ** 3 + 6. * (fi * xi1 - fi1 * xi)) + hi / 6. * (
+					si1 * xi - si * xi1)
+		b = 1. / (2. * hi) * (si1 * xi ** 2 - si * xi1 ** 2 + 2 * (fi1 - fi)) + hi / 6. * (si - si1)
+		c = 1. / (2. * hi) * (si * xi1 - si1 * xi)
+		d = 1. / (6. * hi) * (si1 - si)
 
-		return [d,c,b,a]
+		return [d, c, b, a]
 
-	#-----------------------------------------------------------------------
+	# -----------------------------------------------------------------------
 	def __call__(self, i, x):
 		# FIXME should interpolate to find the interval
 		C = self.coefficients(i)
-		return ((C[0]*x + C[1])*x + C[2])*x + C[3]
+		return ((C[0] * x + C[1]) * x + C[2]) * x + C[3]
 
-	#-----------------------------------------------------------------------
+	# -----------------------------------------------------------------------
 	# @return evaluation of cubic spline at x using coefficients C
-	#-----------------------------------------------------------------------
+	# -----------------------------------------------------------------------
 	def evaluate(self, C, x):
-		return ((C[0]*x + C[1])*x + C[2])*x + C[3]
+		return ((C[0] * x + C[1]) * x + C[2]) * x + C[3]
 
-	#-----------------------------------------------------------------------
+	# -----------------------------------------------------------------------
 	# Return evaluated derivative at x using coefficients C
-	#-----------------------------------------------------------------------
+	# -----------------------------------------------------------------------
 	def derivative(self, C, x):
-		a = 3.0*C[0]			# derivative coefficients
-		b = 2.0*C[1]			# ... for sampling with rejection
-		c =     C[2]
-		return (3.0*C[0]*x + 2.0*C[1])*x + C[2]
+		a = 3.0 * C[0]  # derivative coefficients
+		b = 2.0 * C[1]  # ... for sampling with rejection
+		c = C[2]
+		return (3.0 * C[0] * x + 2.0 * C[1]) * x + C[2]
+
 
 # ------------------------------------------------------------------------------
 # Convert a B-spline to polyline with a fixed number of segments
@@ -182,11 +187,11 @@ class CubicSpline:
 # ------------------------------------------------------------------------------
 def spline2Polyline(xyz, degree, closed, segments, knots):
 	# Check if last point coincide with the first one
-	if (bmath.Vector(xyz[0])-bmath.Vector(xyz[-1])).length2() < 1e-10:
+	if (bmath.Vector(xyz[0]) - bmath.Vector(xyz[-1])).length2() < 1e-10:
 		# it is already closed, treat it as open
 		closed = False
-		# FIXME we should verify if it is periodic,.... but...
-		#       I am not sure :)
+	# FIXME we should verify if it is periodic,.... but...
+	#       I am not sure :)
 
 	if closed:
 		xyz.extend(xyz[:degree])
@@ -197,33 +202,33 @@ def spline2Polyline(xyz, degree, closed, segments, knots):
 
 	npts = len(xyz)
 
-	if degree<1 or degree>3:
-		#print "invalid degree"
-		return None,None,None
+	if degree < 1 or degree > 3:
+		# print "invalid degree"
+		return None, None, None
 
 	# order:
-	k = degree+1
+	k = degree + 1
 
 	if npts < k:
-		#print "not enough control points"
-		return None,None,None
+		# print "not enough control points"
+		return None, None, None
 
 	# resolution:
 	nseg = segments * npts
 
 	# WARNING: base 1
-	b = [0.0]*(npts*3+1)		# polygon points
-	h = [1.0]*(npts+1)		# set all homogeneous weighting factors to 1.0
-	p = [0.0]*(nseg*3+1)		# returned curved points
+	b = [0.0] * (npts * 3 + 1)  # polygon points
+	h = [1.0] * (npts + 1)  # set all homogeneous weighting factors to 1.0
+	p = [0.0] * (nseg * 3 + 1)  # returned curved points
 
 	i = 1
 	for pt in xyz:
-		b[i]   = pt[0]
-		b[i+1] = pt[1]
-		b[i+2] = pt[2]
-		i +=3
+		b[i] = pt[0]
+		b[i + 1] = pt[1]
+		b[i + 2] = pt[2]
+		i += 3
 
-	#if periodic:
+	# if periodic:
 	if closed:
 		_rbsplinu(npts, k, nseg, b, h, p, knots)
 	else:
@@ -232,15 +237,16 @@ def spline2Polyline(xyz, degree, closed, segments, knots):
 	x = []
 	y = []
 	z = []
-	for i in range(1,3*nseg+1,3):
+	for i in range(1, 3 * nseg + 1, 3):
 		x.append(p[i])
-		y.append(p[i+1])
-		z.append(p[i+2])
+		y.append(p[i + 1])
+		z.append(p[i + 2])
 
-#	for i,xyz in enumerate(zip(x,y,z)):
-#		print i,xyz
+	#	for i,xyz in enumerate(zip(x,y,z)):
+	#		print i,xyz
 
-	return x,y,z
+	return x, y, z
+
 
 # ------------------------------------------------------------------------------
 # Subroutine to generate a B-spline open knot vector with multiplicity
@@ -252,13 +258,14 @@ def spline2Polyline(xyz, degree, closed, segments, knots):
 #    x[]          = array containing the knot vector
 # ------------------------------------------------------------------------------
 def _knot(n, order):
-	x = [0.0]*(n+order+1)
-	for i in range(2, n+order+1):
-		if i>order and i<n+2:
-			x[i] = x[i-1] + 1.0
+	x = [0.0] * (n + order + 1)
+	for i in range(2, n + order + 1):
+		if i > order and i < n + 2:
+			x[i] = x[i - 1] + 1.0
 		else:
-			x[i] = x[i-1]
+			x[i] = x[i - 1]
 	return x
+
 
 # ------------------------------------------------------------------------------
 # Subroutine to generate a B-spline uniform (periodic) knot vector.
@@ -269,10 +276,11 @@ def _knot(n, order):
 # x[]          = array containing the knot vector
 # ------------------------------------------------------------------------------
 def _knotu(n, order):
-	x = [0]*(n+order+1)
-	for i in range(2, n+order+1):
-		x[i] = float(i-1)
+	x = [0] * (n + order + 1)
+	for i in range(2, n + order + 1):
+		x[i] = float(i - 1)
 	return x
+
 
 # ------------------------------------------------------------------------------
 # Subroutine to generate rational B-spline basis functions--open knot vector
@@ -299,27 +307,27 @@ def _knotu(n, order):
 # ------------------------------------------------------------------------------
 def _rbasis(c, t, npts, x, h, r):
 	nplusc = npts + c
-	temp = [0.0]*(nplusc+1)
+	temp = [0.0] * (nplusc + 1)
 
 	# calculate the first order non-rational basis functions n[i]
 	for i in range(1, nplusc):
-		if x[i] <= t < x[i+1]:
+		if x[i] <= t < x[i + 1]:
 			temp[i] = 1.0
 		else:
 			temp[i] = 0.0
 
 	# calculate the higher order non-rational basis functions
-	for k in range(2,c+1):
-		for i in range(1,nplusc-k+1):
+	for k in range(2, c + 1):
+		for i in range(1, nplusc - k + 1):
 			# if the lower order basis function is zero skip the calculation
 			if temp[i] != 0.0:
-				d = ((t-x[i])*temp[i])/(x[i+k-1]-x[i])
+				d = ((t - x[i]) * temp[i]) / (x[i + k - 1] - x[i])
 			else:
 				d = 0.0
 
 			# if the lower order basis function is zero skip the calculation
-			if temp[i+1] != 0.0:
-				e = ((x[i+k]-t)*temp[i+1])/(x[i+k]-x[i+1])
+			if temp[i + 1] != 0.0:
+				e = ((x[i + k] - t) * temp[i + 1]) / (x[i + k] - x[i + 1])
 			else:
 				e = 0.0
 			temp[i] = d + e
@@ -330,15 +338,16 @@ def _rbasis(c, t, npts, x, h, r):
 
 	# calculate sum for denominator of rational basis functions
 	s = 0.0
-	for i in range(1,npts+1):
-		s += temp[i]*h[i]
+	for i in range(1, npts + 1):
+		s += temp[i] * h[i]
 
 	# form rational basis functions and put in r vector
-	for i in range(1, npts+1):
+	for i in range(1, npts + 1):
 		if s != 0.0:
-			r[i] = (temp[i]*h[i])/s
+			r[i] = (temp[i] * h[i]) / s
 		else:
 			r[i] = 0
+
 
 # ------------------------------------------------------------------------------
 # Generates a rational B-spline curve using a uniform open knot vector.
@@ -370,31 +379,32 @@ def _rbasis(c, t, npts, x, h, r):
 # ------------------------------------------------------------------------------
 def _rbspline(npts, k, p1, b, h, p, x):
 	nplusc = npts + k
-	nbasis = [0.0]*(npts+1)		# zero and re-dimension the basis array
+	nbasis = [0.0] * (npts + 1)  # zero and re-dimension the basis array
 
 	# generate the uniform open knot vector
-	if x is None or len(x) != nplusc+1:
+	if x is None or len(x) != nplusc + 1:
 		x = _knot(npts, k)
 	icount = 0
 	# calculate the points on the rational B-spline curve
 	t = 0
-	step = float(x[nplusc])/float(p1-1)
-	for i1 in range(1, p1+1):
+	step = float(x[nplusc]) / float(p1 - 1)
+	for i1 in range(1, p1 + 1):
 		if x[nplusc] - t < 5e-6:
 			t = x[nplusc]
 		# generate the basis function for this value of t
-		nbasis = [0.0]*(npts+1)	# zero and re-dimension the knot vector and the basis array
+		nbasis = [0.0] * (npts + 1)  # zero and re-dimension the knot vector and the basis array
 		_rbasis(k, t, npts, x, h, nbasis)
 		# generate a point on the curve
 		for j in range(1, 4):
 			jcount = j
-			p[icount+j] = 0.0
+			p[icount + j] = 0.0
 			# Do local matrix multiplication
-			for i in range(1, npts+1):
-				p[icount+j] +=  nbasis[i]*b[jcount]
+			for i in range(1, npts + 1):
+				p[icount + j] += nbasis[i] * b[jcount]
 				jcount += 3
 		icount += 3
 		t += step
+
 
 # ------------------------------------------------------------------------------
 # Subroutine to generate a rational B-spline curve using an uniform periodic knot vector
@@ -426,44 +436,46 @@ def _rbspline(npts, k, p1, b, h, p, x):
 # ------------------------------------------------------------------------------
 def _rbsplinu(npts, k, p1, b, h, p, x=None):
 	nplusc = npts + k
-	nbasis = [0.0]*(npts+1)		# zero and re-dimension the basis array
+	nbasis = [0.0] * (npts + 1)  # zero and re-dimension the basis array
 	# generate the uniform periodic knot vector
-	if x is None or len(x) != nplusc+1:
+	if x is None or len(x) != nplusc + 1:
 		# zero and re dimension the knot vector and the basis array
 		x = _knotu(npts, k)
 	icount = 0
 	# calculate the points on the rational B-spline curve
-	t = k-1
-	step = (float(npts)-(k-1))/float(p1-1)
-	for i1 in range(1, p1+1):
+	t = k - 1
+	step = (float(npts) - (k - 1)) / float(p1 - 1)
+	for i1 in range(1, p1 + 1):
 		if x[nplusc] - t < 5e-6:
 			t = x[nplusc]
 		# generate the basis function for this value of t
-		nbasis = [0.0]*(npts+1)
+		nbasis = [0.0] * (npts + 1)
 		_rbasis(k, t, npts, x, h, nbasis)
 		# generate a point on the curve
-		for j in range(1,4):
+		for j in range(1, 4):
 			jcount = j
-			p[icount+j] = 0.0
+			p[icount + j] = 0.0
 			#  Do local matrix multiplication
-			for i in range(1,npts+1):
-				p[icount+j] += nbasis[i]*b[jcount]
+			for i in range(1, npts + 1):
+				p[icount + j] += nbasis[i] * b[jcount]
 				jcount += 3
 		icount += 3
 		t += step
+
 
 # =============================================================================
 if __name__ == "__main__":
 	SPLINE_SEGMENTS = 20
 	from dxf import DXF
-#	from dxfwrite.algebra import CubicSpline, CubicBezierCurve
-	dxf = DXF(sys.argv[1],"r")
+
+	#	from dxfwrite.algebra import CubicSpline, CubicBezierCurve
+	dxf = DXF(sys.argv[1], "r")
 	dxf.readFile()
 	dxf.close()
-	for name,layer in dxf.layers.items():
+	for name, layer in dxf.layers.items():
 		for entity in layer.entities:
 			if entity.type == "SPLINE":
 				xy = zip(entity[10], entity[20])
-				x,y = spline2Polyline(xy, int(entity[71]), True, SPLINE_SEGMENTS)
-				#for a,b in zip(x,y):
-				#	print a,b
+				x, y = spline2Polyline(xy, int(entity[71]), True, SPLINE_SEGMENTS)
+		# for a,b in zip(x,y):
+		#	print a,b

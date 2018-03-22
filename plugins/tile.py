@@ -6,7 +6,7 @@
 # Date:	20-Aug-2015
 
 __author__ = "Vasilis Vlachoudis"
-__email__  = "Vasilis.Vlachoudis@cern.ch"
+__email__ = "Vasilis.Vlachoudis@cern.ch"
 
 __name__ = _("Tile")
 
@@ -17,25 +17,27 @@ try:
 except ImportError:
 	import tkinter.messagebox as tkMessageBox
 
-#import math
-#from bmath import Vector
-#from CNC import CW,CCW,CNC,Block
 
-#==============================================================================
+# import math
+# from bmath import Vector
+# from CNC import CW,CCW,CNC,Block
+
+# ==============================================================================
 # Tile replicas of the selected blocks
-#==============================================================================
+# ==============================================================================
 class Tool(Plugin):
 	__doc__ = _("Generate replicas of selected code")
+
 	def __init__(self, master):
 		Plugin.__init__(self, master, "Tile")
-		self.icon  = "tile"
+		self.icon = "tile"
 		self.group = "CAM"
 		self.variables = [
-			("name",      "db",    "", _("Name")),
-			("nx",       "int",     3, "Nx"),
-			("ny",       "int",     3, "Ny"),
-			("dx",        "mm",  50.0, "Dx"),
-			("dy",        "mm",  50.0, "Dy")
+			("name", "db", "", _("Name")),
+			("nx", "int", 3, "Nx"),
+			("ny", "int", 3, "Ny"),
+			("dx", "mm", 50.0, "Dx"),
+			("dy", "mm", 50.0, "Dy")
 		]
 		self.buttons.append("exe")
 
@@ -49,7 +51,7 @@ class Tool(Plugin):
 
 		if not blocks:
 			tkMessageBox.showerror(_("Tile error"),
-				_("No g-code blocks selected"))
+			                       _("No g-code blocks selected"))
 			return
 
 		try:
@@ -62,24 +64,24 @@ class Tool(Plugin):
 		except:
 			dy = 0.0
 
-		pos = blocks[-1]	# insert position
+		pos = blocks[-1]  # insert position
 
-		#undoinfo = []
+		# undoinfo = []
 		y = 0.0
 		pos += 1
 		for j in range(self["ny"]):
 			x = 0.0
 			for i in range(self["nx"]):
-				if i==0 and j==0:
+				if i == 0 and j == 0:
 					# skip the first 
 					x += dx
 					continue
 				# clone selected blocks
-				undoinfo = []	# FIXME it should be only one UNDO
+				undoinfo = []  # FIXME it should be only one UNDO
 				newblocks = []
 				for bid in blocks:
 					undoinfo.append(app.gcode.cloneBlockUndo(bid, pos))
-					newblocks.append((pos,None))
+					newblocks.append((pos, None))
 					pos += 1
 				app.addUndo(undoinfo)
 
