@@ -47,7 +47,6 @@ Utils.loadConfiguration()
 
 import rexx
 import tkExtra
-import Updates
 import bFileDialog
 
 from CNC import WAIT, CNC, GCode
@@ -2609,7 +2608,6 @@ if __name__ == "__main__":
 		                         "\tor yum install python-serial\n" \
 		                         "\tor dnf install python-pyserial"),
 		                       parent=application)
-		if Updates.need2Check(): application.checkUpdates()
 
 	if run:
 		application.run()
