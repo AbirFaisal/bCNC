@@ -143,18 +143,6 @@ class OptionsGroup(CNCRibbon.ButtonGroup):
 		b.grid(row=row, column=col, padx=0, pady=0, sticky=EW)
 		tkExtra.Balloon.set(b, _("Send Error Report"))
 
-		# ---
-		col, row = 1, 1
-		b = Ribbon.LabelButton(self.frame,
-		                       text=_("Updates"),
-		                       image=Utils.icons["global"],
-		                       compound=LEFT,
-		                       command=self.app.checkUpdates,
-		                       anchor=W,
-		                       background=Ribbon._BACKGROUND)
-		b.grid(row=row, column=col, padx=0, pady=0, sticky=EW)
-		tkExtra.Balloon.set(b, _("Check Updates"))
-
 		col, row = 1, 2
 		b = Ribbon.LabelButton(self.frame,
 		                       text=_("About"),

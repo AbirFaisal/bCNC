@@ -561,13 +561,6 @@ class Application(Toplevel, Sender):
 	def disable(self):
 		self.configWidgets("state", DISABLED)
 
-	# ----------------------------------------------------------------------
-	# Check for updates
-	# ----------------------------------------------------------------------
-	def checkUpdates(self):
-		# Find bCNC version
-		Updates.CheckUpdateDialog(self, __version__)
-
 	# -----------------------------------------------------------------------
 	def loadShortcuts(self):
 		for name, value in Utils.config.items("Shortcut"):
